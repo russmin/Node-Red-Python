@@ -1,32 +1,29 @@
 #!/usr/bin/python
 
 import time
-import io, json 					#needed for exporting payloads to json file
-import paho.mqtt.client as mqtt
-
+import io, json 	#needed for exporting payloads to json file
 import argparse
 import logging
 import base64
 import binascii
 import httplib # be careful for python3!
 
+import paho.mqtt.client as mqtt ##mqtt library
 
 class mqttStoreForward:
 
 	#class variables
-	isConnected = False
-	isOnMessage = False
-				#checks ethernet connection
-	lora_client = mqtt.Client()
+	isConnected = False					#checks ethernet connection            
+	lora_client = mqtt.Client()			
 	packet = None 						#will carry msg payload...empty to begin
 	isJsonEmpty = True 					#keep track of whether file is empty
 	jsonFilePath = 'packetStorage.json' #INPUT DESIRED JSON FILE NAME HERE OR LEAVE DEFAULT
-	payloadData = None
-	devEUI = None
-	rbAuthorization = ''
+	payloadData = None                  # sets the payload data empty
+	devEUI = None 						# sets the Deveui as empty to begin with
+	rbAuthorization = ''				#authorization needed to send https request
 
 	def __init__ (self):
-		#touch jston file if it does not exist
+	#touch json file if it does not exist
 		file = open(self.jsonFilePath, 'a')
 		file.close()
 
@@ -45,7 +42,7 @@ class mqttStoreForward:
 		self.isConnected = False
 		print("The connection has failed.")
 
-## formats the paayload message from the endpoint
+## formats the payload message from the endpoint
 	def rbPayloadFormatters(self, msg):
 		msgObj = json.loads(msg)
 		newMsg = {}
@@ -70,8 +67,6 @@ class mqttStoreForward:
 		pkt = json.loads(self.packet)
 		self.devEUI = pkt["deveui"]
 		self.payloadData = pkt["payload"]
-		self.isOnMessage = True
-
 
 		print(self.packet)
 		#### HTTP REQUEST GOES HERE ####
@@ -107,8 +102,7 @@ class mqttStoreForward:
 		self.lora_client.on_message = self.onMessage
 		self.lora_client.on_disconnect = self.onDisconnect
 
-
-			#takes packet parameter and appends it to a file
+	#takes packet parameter and appends it to a file
 	def writeToJson(self, data):
 		with open(self.jsonFilePath, 'a') as myFile:
 			myFile.write(data + "\r\n")
