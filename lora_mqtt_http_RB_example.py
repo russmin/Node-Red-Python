@@ -6,7 +6,7 @@ import argparse
 import logging
 import base64
 import binascii
-import httplib # be careful for python3!
+import http.client
 
 import paho.mqtt.client as mqtt ##mqtt library
 
@@ -70,7 +70,7 @@ class mqttStoreForward:
 
 		print(self.packet)
 		#### HTTP REQUEST GOES HERE ####
-		rbConnection = httplib.HTTPSConnection("console.radiobridge.com")
+		rbConnection = http.client.HTTPSConnection("console.radiobridge.com")
 		rbHeaders = {"Content-Type": "application/json", "Accept":"application/json"}
 		rbConnection.request("POST", "/uplink_api_callback", self.packet, rbHeaders)
 		rbResponse = rbConnection.getresponse()
